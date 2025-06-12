@@ -5,8 +5,6 @@ require "stud/interval"
 require "logstash-input-http_jars"
 require "logstash/plugin_mixins/ecs_compatibility_support"
 require "logstash/plugin_mixins/normalize_config_support"
-require "json"
-require "time"
 
 # Using this input you can receive single or multiline events over http(s).
 # Applications can send a HTTP POST request with a body to the endpoint started by this
@@ -444,38 +442,6 @@ class LogStash::Inputs::Http < LogStash::Inputs::Base
       ::LogStash::Plugins::Contextualizer.initialize_plugin(execution_context, codec_klass)
     else
       codec_klass.new 
-    end
-  end
-
-  def handle_request(request, response)
-    begin
-      body = request.body.read
-      parsed_body = JSON.parse(body)
-      request_id = "1607"
-      timestamp = "12h30"
-  
-      # Process the event (e.g., queue it for Logstash pipeline)
-      # ...
-  
-      response.status = 200
-      response.body = {
-        "requestId": request_id,
-        "timestamp": timestamp
-      }.to_json
-    rescue JSON::ParserError
-      response.status = 400
-      response.body = {
-        "requestId": nil,
-        "timestamp": (Time.now.to_f * 1000).to_i,
-        "errorMessage": "Invalid JSON format"
-      }.to_json
-    rescue => e
-      response.status = 500
-      response.body = {
-        "requestId": request_id || nil,
-        "timestamp": (Time.now.to_f * 1000).to_i,
-        "errorMessage": "Unable to deliver records due to unknown error."
-      }.to_json
     end
   end
 

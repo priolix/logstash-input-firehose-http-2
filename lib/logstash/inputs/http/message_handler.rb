@@ -45,5 +45,6 @@ module LogStash module Inputs class Http
     def response_headers
       @input.response_headers
     end
+
   end
 end; end; end
