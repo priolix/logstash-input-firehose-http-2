@@ -33,10 +33,12 @@ public class NettyHttpServer implements Runnable, Closeable {
 
     public NettyHttpServer(final String id, final String host, final int port, final IMessageHandler messageHandler,
                            final SslHandlerProvider sslHandlerProvider, final int threads,
-                           final int maxPendingRequests, final int maxContentLength, final int responseCode)
+                           int maxPendingRequests, int maxContentLength, 
+                           int responseCode, String responseBody)
     {
         this.host = host;
         this.port = port;
+
         this.responseStatus = HttpResponseStatus.valueOf(responseCode);
 
         // boss group is responsible for accepting incoming connections and sending to worker loop
@@ -51,7 +53,7 @@ public class NettyHttpServer implements Runnable, Closeable {
                 new CustomRejectedExecutionHandler());
 
         final HttpInitializer httpInitializer = new HttpInitializer(messageHandler, executorGroup,
-                                                                      maxContentLength, responseStatus);
+                                                                      maxContentLength, responseStatus, responseBody);
 
         if (sslHandlerProvider != null) {
             httpInitializer.enableSSL(sslHandlerProvider);
