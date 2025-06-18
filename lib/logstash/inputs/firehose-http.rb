@@ -36,7 +36,7 @@ class LogStash::Inputs::Http < LogStash::Inputs::Base
   java_import "io.netty.handler.codec.http.HttpUtil"
   java_import 'org.logstash.plugins.inputs.http.util.SslSimpleBuilder'
 
-  config_name "http"
+  config_name "firehose-http"
 
   # Codec used to decode the incoming data.
   # This codec will be used as a fall-back if the content-type
@@ -118,7 +118,10 @@ class LogStash::Inputs::Http < LogStash::Inputs::Base
   config :additional_codecs, :validate => :hash, :default => { "application/json" => "json" }
 
   # specify a custom set of response headers
-  config :response_headers, :validate => :hash, :default => { 'Content-Type' => 'text/plain' }
+  config :response_headers, :validate => :hash, :default => { 'content-type' => 'text/plain' }
+
+  # Send this as the body to each HTTP POST. A JSON example: `'{"ok": true}'`.
+  config :response_body, :default => "test"
 
   # target field for the client host of the http request
   config :remote_host_target_field, :validate => :string
@@ -325,7 +328,7 @@ class LogStash::Inputs::Http < LogStash::Inputs::Base
   def create_http_server(message_handler)
     org.logstash.plugins.inputs.http.NettyHttpServer.new(
       @id, @host, @port, message_handler, build_ssl_params, @threads,
-      @max_pending_requests, @max_content_length, @response_code)
+      @max_pending_requests, @max_content_length, @response_code, @response_body)
   end
 
   def build_ssl_params
